@@ -99,6 +99,14 @@
             <version>2.25.39</version>
         </dependency>
 
+        <!-- para el evn-->
+        <dependency>
+            <groupId>me.paulschwarz</groupId>
+            <artifactId>spring-dotenv</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+
+
         <!-- Lombok y MapStruct -->
         <dependency>
             <groupId>org.projectlombok</groupId>
