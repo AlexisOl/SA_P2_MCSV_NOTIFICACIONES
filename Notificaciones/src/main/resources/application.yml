@@ -47,9 +47,15 @@ spring:
           auth: true
           starttls:
             enable: true
+      debug: true
 #eureka:
 #  client:
 #    service-url:
 #      defaultZone: http://eureka-service:8765/
 #    register-with-eureka: true
 #    fetch-registry: true
+
+app:
+  kafka:
+    topic:
+      users: users.events.v1
