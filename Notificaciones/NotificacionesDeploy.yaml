@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notificaciones-deploy
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notificaciones
+  template:
+    metadata:
+      labels:
+        app: notificaciones
+    spec:
+      containers:
+        - name: notificaciones
+          image: IMAGE_TAG
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8089
+          env:
+            - name: SPRING_MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: correo-credenciales
+                  key: SPRING_MAIL_USERNAME
+            - name: SPRING_MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: correo-credenciales
+                  key: SPRING_MAIL_PASSWORD
+
+            - name: SPRING_PROFILES_ACTIVE
+              value: "eks"
+            # - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+            #   value: "kafka.kafka.svc.cluster.local:9092"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mariadb://40.233.27.238:3307/notifications_db"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "app_user"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "appSa456."
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: "http://eureka-service:8765/eureka/"
+            # Kafka MSK
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: b-1.kafkap2sa.uqqw98.c10.kafka.us-east-1.amazonaws.com:9094,b-2.kafkap2sa.uqqw98.c10.kafka.us-east-1.amazonaws.com:9094
+            - name: SPRING_KAFKA_CONSUMER_GROUP_ID
+              value: notificaciones-group
+            - name: SPRING_KAFKA_PRODUCER_ACKS
+              value: all
+            - name: SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET
+              value: earliest
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8089
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8089
+            initialDelaySeconds: 60
+            periodSeconds: 10

@@ -24,23 +24,14 @@ spring:
 
     #database-platform: org.hibernate.dialect.MySQL8Dialect
 
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: mcsv-notificaciones
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
 
 
   mail:
     host: smtp.gmail.com
     port: 587
-    username: oleoalexis@gmail.com
-    password: jdlxtvubffemxisr
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -48,13 +39,40 @@ spring:
           starttls:
             enable: true
       debug: true
-#eureka:
-#  client:
-#    service-url:
-#      defaultZone: http://eureka-service:8765/
-#    register-with-eureka: true
-#    fetch-registry: true
 
+
+  kafka:
+    admin:
+      auto-create: true
+    bootstrap-servers:
+      #- localhost:9092
+      - b-1.kafkap2sa.uqqw98.c10.kafka.us-east-1.amazonaws.com:9094
+      - b-2.kafkap2sa.uqqw98.c10.kafka.us-east-1.amazonaws.com:9094
+    consumer:
+      group-id: notificaciones-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        security.protocol: SSL
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      properties:
+        security.protocol: SSL
+
+logging:
+  level:
+    org.apache.kafka: WARN
+    #com.tusmicroservicios.anuncios: DEBUG
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-service:8765/
+    register-with-eureka: true
+    fetch-registry: true
 app:
   kafka:
     topic:
