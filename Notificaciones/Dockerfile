@@ -2,8 +2,8 @@ FROM bellsoft/liberica-openjdk-alpine:21.0.3
 
 WORKDIR /app
 
-COPY target/mcsv-anuncios.jar /app/mcsv-anuncios.jar
+COPY target/mcsv-notificaciones.jar /app/mcsv-notificaciones.jar
 
-EXPOSE 8084
+EXPOSE 8089
 
-ENTRYPOINT ["java", "-jar", "mcsv-anuncios.jar"]
+ENTRYPOINT ["java", "-jar", "mcsv-notificaciones.jar"]
