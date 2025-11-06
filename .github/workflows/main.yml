@@ -52,7 +52,7 @@ jobs:
       - name: Build and push Docker image
         run: |
           IMAGE=${{ secrets.DOCKER_USERNAME }}/mcsv-notificaciones:${{ github.sha }}
-          cd facturacion
+          cd Notificaciones
           docker build -f Dockerfile -t $IMAGE .
           docker push $IMAGE
 
