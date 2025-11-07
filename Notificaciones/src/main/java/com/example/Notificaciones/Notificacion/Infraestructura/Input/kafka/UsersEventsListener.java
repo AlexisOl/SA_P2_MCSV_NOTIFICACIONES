@@ -10,9 +10,11 @@ import org.springframework.stereotype.Component;
 
 import com.example.Notificaciones.Notificacion.Aplicacion.CasosUso.EnvioMensajesCorreo.EnvioMensajesCorreoDTO;
 import com.example.Notificaciones.Notificacion.Aplicacion.ports.Input.EnvioMensajesCorreoInputPort;
+import com.example.Notificaciones.Notificacion.Infraestructura.Input.kafka.dto.PasswordResetRequestedEventDto;
+import com.example.Notificaciones.Notificacion.Infraestructura.Input.kafka.dto.UserRegisteredEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.example.comun.DTO.userEvents.PasswordResetRequestedEventDto;
-import com.example.comun.DTO.userEvents.UserRegisteredEvent;
+//import com.example.comun.DTO.userEvents.PasswordResetRequestedEventDto;
+//import com.example.comun.DTO.userEvents.UserRegisteredEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
