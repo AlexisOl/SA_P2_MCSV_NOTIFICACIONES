@@ -49,7 +49,7 @@ spring:
       - b-1.kafkap2sa.uqqw98.c10.kafka.us-east-1.amazonaws.com:9094
       - b-2.kafkap2sa.uqqw98.c10.kafka.us-east-1.amazonaws.com:9094
     consumer:
-      group-id: notificaciones-group
+      group-id: mcsv-notificaciones
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -77,3 +77,4 @@ app:
   kafka:
     topic:
       users: users.events.v1
+      reset-password: reset-user-password

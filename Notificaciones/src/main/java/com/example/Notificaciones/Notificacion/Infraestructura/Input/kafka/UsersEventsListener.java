@@ -21,76 +21,109 @@ import lombok.extern.slf4j.Slf4j;
 public class UsersEventsListener {
 
     private final EnvioMensajesCorreoInputPort correoService;
-    private final ObjectMapper mapper; // <- Usa el bean de Spring
+    private final ObjectMapper mapper;
 
+    // ========== 1) USER REGISTERED ==========
     @KafkaListener(
-        topics = "users-events-v1",
+        topics = "${app.kafka.topic.users:users-events-v1}",
         groupId = "mcsv-notificaciones"
     )
-    public void onMessage(
+    public void onUserRegistered(
         @Payload String payload,
         @Header(value = "eventType", required = false) String eventType,
         @Header(value = KafkaHeaders.RECEIVED_KEY, required = false) String key
-    ) throws Exception {
-
-        log.info("Evento recibido: type={} key={} payload={}", eventType, key, payload);
-
-        if (eventType == null || eventType.isBlank()) {
-            log.warn("Mensaje sin header 'eventType'. Se ignora.");
-            return; // o intenta inferir por estructura del JSON si lo deseas
-        }
+    ) {
+        log.info("[REGISTER] Evento recibido: type={} key={} payload={}", eventType, key, payload);
 
         try {
-            switch (eventType) {
-                case "user.registered.v1" -> {
-                    var p = mapper.readValue(payload, RegisteredPayload.class);
-                    correoService.envioCorreo(new EnvioMensajesCorreoDTO(
-                        p.email(),
-                        "Bienvenido/a, " + p.nombre(),
-                        "Tu cuenta se ha creado correctamente. ¡Gracias por registrarte!"
-                    ));
-                }
-                case "user.password.reset.requested.v1" -> {
-                    var p = mapper.readValue(payload, PasswordResetPayload.class);
-                    // cuerpo del correo (usa HTML si quieres)
-                    String subject = "Reestablecer tu contraseña";
-                    String body = """
-                        Hola %s,
-                        Recibimos una solicitud para reestablecer tu contraseña.
-                        Usa este enlace (válido hasta %s):
-                        %s
-
-                        Si no fuiste tú, ignora este correo.
-                        """.formatted(p.nombre(), p.expiresAt(), p.link());
-                    correoService.envioCorreo(new EnvioMensajesCorreoDTO(p.email(), subject, body));
-                }
-                
-                case "user.wallet-credited.v1" -> {
-                    var p = mapper.readValue(payload, WalletPayload.class);
-                    correoService.envioCorreo(new EnvioMensajesCorreoDTO(
-                        p.email(),
-                        "¡Acreditación recibida!",
-                        "Se acreditó " + p.monto() + ". Nuevo saldo: " + p.saldo()
-                    ));
-                }
-                case "user.wallet-debited.v1" -> {
-                    var p = mapper.readValue(payload, WalletPayload.class);
-                    correoService.envioCorreo(new EnvioMensajesCorreoDTO(
-                        p.email(),
-                        "Débito realizado",
-                        "Se debitó " + p.monto() + ". Nuevo saldo: " + p.saldo()
-                    ));
-                }
-                default -> log.warn("Evento no manejado: {}", eventType);
+            if (!"user.registered.v1".equals(eventType)) {
+                log.warn("[REGISTER] eventType inesperado en este topic: {}", eventType);
+                return;
             }
+
+            RegisteredPayload p = mapper.readValue(payload, RegisteredPayload.class);
+
+            String subject = "Bienvenido/a, " + p.nombre();
+            String body = """
+                    ¡Hola %s! 👋
+
+                    Tu cuenta se ha creado correctamente. ¡Gracias por registrarte en nuestra plataforma! 🎬🍿
+
+                    Ahora puedes iniciar sesión y disfrutar de nuestras funciones.
+
+                    Saludos,
+                    Equipo de Soporte
+                    """.formatted(p.nombre());
+
+            correoService.envioCorreo(new EnvioMensajesCorreoDTO(
+                p.email(),
+                subject,
+                body
+            ));
+
+            log.info("[REGISTER] Correo de bienvenida enviado a {}", p.email());
+
         } catch (Exception ex) {
-            // Evita que reviente el listener y quede reintentando en loop
-            log.error("Error procesando evento {}: {}", eventType, ex.getMessage(), ex);
-            // Aquí puedes decidir: return (descartar) o relanzar para DLT si la tienes configurada
+            log.error("[REGISTER] Error procesando evento: {}", ex.getMessage(), ex);
         }
     }
 
-    // DTOs para mapear el JSON del user.ms (publisher)
+    // ========== 2) PASSWORD RESET REQUESTED ==========
+    @KafkaListener(
+        topics = "${app.kafka.topic.reset-password:reset-user-password}",
+        groupId = "mcsv-notificaciones"
+    )
+    public void onPasswordResetRequested(
+        @Payload String payload,
+        @Header(value = "eventType", required = false) String eventType,
+        @Header(value = KafkaHeaders.RECEIVED_KEY, required = false) String key
+    ) {
+        log.info("[RESET] Evento recibido: type={} key={} payload={}", eventType, key, payload);
+
+        try {
+            if (!"user.password.reset.requested.v1".equals(eventType)) {
+                log.warn("[RESET] eventType inesperado en este topic: {}", eventType);
+                return;
+            }
+
+            PasswordResetPayload p = mapper.readValue(payload, PasswordResetPayload.class);
+
+            String subject = "Restablecer tu contraseña";
+            String body = """
+                    Hola %s,
+
+                    Recibimos una solicitud para restablecer tu contraseña.
+
+                    Usa este enlace (válido hasta %s):
+                    %s
+
+                    Si no fuiste tú, puedes ignorar este correo.
+
+                    Saludos,
+                    Equipo de Soporte
+                    """.formatted(p.nombre(), p.expiresAt(), p.link());
+
+            correoService.envioCorreo(new EnvioMensajesCorreoDTO(
+                p.email(),
+                subject,
+                body
+            ));
+
+            log.info("[RESET] Correo de reset enviado a {}", p.email());
+
+        } catch (Exception ex) {
+            log.error("[RESET] Error procesando evento: {}", ex.getMessage(), ex);
+        }
+    }
+
+    // ===== DTOs que deben machear el JSON que manda el ms-usuarios =====
+
+    public static record RegisteredPayload(
+        String userId,
+        String nombre,
+        String email
+    ) {}
+
     public static record PasswordResetPayload(
         String userId,
         String email,
@@ -99,6 +132,4 @@ public class UsersEventsListener {
         String link,
         Instant expiresAt
     ) {}
-    public record RegisteredPayload(String userId, String nombre, String email) {}
-    public record WalletPayload(String userId, java.math.BigDecimal monto, java.math.BigDecimal saldo, String email) {}
 }
