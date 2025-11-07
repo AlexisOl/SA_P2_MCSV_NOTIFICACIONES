@@ -24,8 +24,8 @@ public class UsersEventsListener {
     private final ObjectMapper mapper; // <- Usa el bean de Spring
 
     @KafkaListener(
-        topics = "${app.kafka.topic.users:users.events.v1}",
-        groupId = "${spring.kafka.consumer.group-id:mcsv-notificaciones}"
+        topics = "users-events-v1",
+        groupId = "mcsv-notificaciones"
     )
     public void onMessage(
         @Payload String payload,
