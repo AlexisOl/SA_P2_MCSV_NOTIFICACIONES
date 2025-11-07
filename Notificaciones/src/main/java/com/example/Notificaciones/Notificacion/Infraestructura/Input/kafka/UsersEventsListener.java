@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.example.Notificaciones.Notificacion.Aplicacion.CasosUso.EnvioMensajesCorreo.EnvioMensajesCorreoDTO;
 import com.example.Notificaciones.Notificacion.Aplicacion.ports.Input.EnvioMensajesCorreoInputPort;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.comun.DTO.userEvents.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +42,7 @@ public class UsersEventsListener {
                 return;
             }
 
-            RegisteredPayload p = mapper.readValue(payload, RegisteredPayload.class);
+            UserRegisteredEvent p = mapper.readValue(payload, UserRegisteredEvent.class);
 
             String subject = "Bienvenido/a, " + p.nombre();
             String body = """
@@ -86,7 +87,7 @@ public class UsersEventsListener {
                 return;
             }
 
-            PasswordResetPayload p = mapper.readValue(payload, PasswordResetPayload.class);
+            PasswordResetRequestedEventDto p = mapper.readValue(payload, PasswordResetRequestedEventDto.class);
 
             String subject = "Restablecer tu contraseña";
             String body = """
@@ -118,18 +119,14 @@ public class UsersEventsListener {
 
     // ===== DTOs que deben machear el JSON que manda el ms-usuarios =====
 
-    public static record RegisteredPayload(
-        String userId,
-        String nombre,
-        String email
-    ) {}
+    
 
-    public static record PasswordResetPayload(
-        String userId,
-        String email,
-        String nombre,
-        String token,
-        String link,
-        Instant expiresAt
-    ) {}
+    // public static record PasswordResetPayload(
+    //     String userId,
+    //     String email,
+    //     String nombre,
+    //     String token,
+    //     String link,
+    //     Instant expiresAt
+    // ) {}
 }
