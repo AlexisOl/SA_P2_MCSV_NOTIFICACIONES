@@ -118,6 +118,11 @@ public class UsersEventsListener {
 
     // ===== DTOs que deben machear el JSON que manda el ms-usuarios =====
 
+    public static record RegisteredPayload(
+        String userId,
+        String nombre,
+        String email
+    ) {}
 
     public static record PasswordResetPayload(
         String userId,
