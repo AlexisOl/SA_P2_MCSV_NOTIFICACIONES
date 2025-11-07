@@ -31,7 +31,7 @@ public class EnvioMensajeServicio implements EnvioMensajesCorreoInputPort {
             );
 
             helper.setTo(dto.getCorreo());
-            helper.setFrom(new InternetAddress("oleoalexis@gmail.com", "THE COFFEE – Quita&Penas"));
+            helper.setFrom(new InternetAddress("oleoalexis@gmail.com", "Tu cine – LuxScreen"));
             helper.setSubject(dto.getMensaje());
 
             String html = """
